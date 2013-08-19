@@ -173,6 +173,12 @@ N3.POP3Server = function(socket, server_name, auth, MsgStore){
     }
     
     //console.log("New connection from "+socket.remoteAddress);
+
+    socket.on('error', function(err) {
+       console.log('socket error: ' + err);
+       socket.destroy();
+    });
+
     this.response("+OK POP3 Server ready <"+this.UID+"@"+this.server_name+">");
     
     socket.on("data", this.onData.bind(this));
@@ -223,7 +229,9 @@ N3.POP3Server.prototype.response = function(message){
     }
     
     //console.log("SERVER: "+message);
-    this.socket.write(response);
+
+    if (this.socket)
+	    this.socket.write(response);
 }
 
 N3.POP3Server.prototype.afterLogin = function(){
@@ -318,7 +326,8 @@ N3.POP3Server.prototype.cmdQUIT = function(){
         this.messages.removeDeleted();
     }
     this.response("+OK N3 POP3 Server signing off");
-    this.socket.end();
+    if (this.socket)
+	this.socket.end();
 }
 
 // AUTHENTICATION commands
